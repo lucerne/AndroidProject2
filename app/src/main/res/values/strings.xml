@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">NYTimesApplication</string>
+    <string name="action_settings">Settings</string>
+    <string name="hint">Enter search query</string>
+    <string name="search">Search</string>
+    <string name="title_activity_article">ArticleActivity</string>
+    <string name="title_activity_setting">SettingActivity</string>
+    <string name="arts">Arts</string>
+    <string name="fashion">Fashion</string>
+    <string name="sport">Sports</string>
+</resources>
