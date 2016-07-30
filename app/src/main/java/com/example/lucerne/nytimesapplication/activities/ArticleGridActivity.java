@@ -1,6 +1,7 @@
 package com.example.lucerne.nytimesapplication.activities;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -12,9 +13,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.GridView;
+import android.widget.ImageView;
 
 import com.example.lucerne.nytimesapplication.R;
 import com.example.lucerne.nytimesapplication.adapters.ArticleArrayAdapter;
@@ -33,11 +34,9 @@ import cz.msebera.android.httpclient.Header;
 
 public class ArticleGridActivity extends AppCompatActivity {
 
-    EditText etQuery;
     GridView gvResults;
-    Button btnSearch;
     ArrayList<Article> articles;
-    ArticleArrayAdapter adapter;
+    ArticleArrayAdapter articleAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,12 +48,10 @@ public class ArticleGridActivity extends AppCompatActivity {
     }
 
     public void setupViews() {
-        etQuery = (EditText) findViewById(R.id.etQuery);
         gvResults = (GridView) findViewById(R.id.gvResults);
-        btnSearch = (Button) findViewById(R.id.btnSearch);
         articles = new ArrayList<>();
-        adapter = new ArticleArrayAdapter(this, articles);
-        gvResults.setAdapter(adapter);
+        articleAdapter = new ArticleArrayAdapter(this, articles);
+        gvResults.setAdapter(articleAdapter);
 
         gvResults.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -63,7 +60,6 @@ public class ArticleGridActivity extends AppCompatActivity {
 
                 Article article = articles.get(position);
 
-//                i.putExtra("url", article.getWebUrl());
                 i.putExtra("article", article);
                 startActivity(i);
             }
@@ -76,11 +72,12 @@ public class ArticleGridActivity extends AppCompatActivity {
         inflater.inflate(R.menu.menu_search, menu);
         MenuItem searchItem = menu.findItem(R.id.action_search);
         final SearchView searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 // perform query here
-
+                OnArticleSearch(query);
                 // workaround to avoid issues with some emulators and keyboard devices firing twice if a keyboard enter is used
                 // see https://code.google.com/p/android/issues/detail?id=24599
                 searchView.clearFocus();
@@ -93,6 +90,22 @@ public class ArticleGridActivity extends AppCompatActivity {
                 return false;
             }
         });
+
+        // Expand the search view and request focus
+        searchItem.expandActionView();
+        searchView.requestFocus();
+
+        // Use a custom search icon for the SearchView in AppBar
+        int searchImgId = android.support.v7.appcompat.R.id.search_button;
+        ImageView v = (ImageView) searchView.findViewById(searchImgId);
+        v.setImageResource(R.drawable.yellowstarfull);
+
+        // Customize searchview text and hint colors
+        int searchEditId = android.support.v7.appcompat.R.id.search_src_text;
+        EditText et = (EditText) searchView.findViewById(searchEditId);
+        et.setTextColor(Color.BLACK);
+        et.setHintTextColor(Color.BLACK);
+
         return super.onCreateOptionsMenu(menu);
     }
 
@@ -112,30 +125,28 @@ public class ArticleGridActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void OnArticleSearch(View view) {
-        String query = etQuery.getText().toString();
-//        Toast.makeText(this, "Search for" + query, Toast.LENGTH_LONG).show();
+    public void OnArticleSearch(String query) {
         AsyncHttpClient client = new AsyncHttpClient();
         String url = "http://api.nytimes.com/svc/search/v2/articlesearch.json";
 
         RequestParams params = new RequestParams();
         params.put("api-key", "7c3bb249c8aa4b7c8861b39cc84300cf");
-//        params.put("page", 0);
-//        params.put("q", query);
+        params.put("page", 0);
+        params.put("q", query);
+        params.put("sort", "newest");
 
         client.get(url, params, new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                 Log.d("DEBUG", response.toString());
-//                super.onSuccess(statusCode, headers, response);
                 JSONArray articleJsonResults = null;
 
                 try {
                     articleJsonResults = response.getJSONObject("response").getJSONArray("docs");
-//                    Log.d("DEBUG", articleJsonResults.toString());
-//                    articles.addAll(Article.fromJSONArray(articleJsonResults));
-//                    adapter.notifyDataSetChanged();
-                    adapter.addAll(Article.fromJSONArray(articleJsonResults));
+
+                    articleAdapter.clear();
+                    articleAdapter.addAll(Article.fromJSONArray(articleJsonResults));
+                    articleAdapter.notifyDataSetChanged();
                     Log.d("DEBUG", articles.toString());
                 } catch (JSONException e){
                     e.printStackTrace();
