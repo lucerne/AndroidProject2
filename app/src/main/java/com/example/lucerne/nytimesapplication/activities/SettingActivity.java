@@ -4,6 +4,7 @@ import android.app.DatePickerDialog;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -15,6 +16,9 @@ import android.widget.Spinner;
 
 import com.example.lucerne.nytimesapplication.R;
 import com.example.lucerne.nytimesapplication.models.DatePickerFragment;
+import com.example.lucerne.nytimesapplication.models.Filter;
+
+import org.parceler.Parcels;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -27,8 +31,8 @@ public class SettingActivity extends AppCompatActivity
 
     final Calendar c = Calendar.getInstance();
     EditText tvBeginDate;
-    Map<String, Boolean> checkboxes;
-    String sortOrder;
+    Map<String, Boolean> checkboxes = new HashMap<String, Boolean>();
+    String sortOrder = "newest";
     Spinner spinner;
 
     @Override
@@ -38,14 +42,23 @@ public class SettingActivity extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        // old settings
+        Filter filter = (Filter) Parcels.unwrap(getIntent().getParcelableExtra("filter"));
+
+        // initialize settings, listener runs before this
         setupCheckboxes();
+        initCheckboxes(filter.getNewsValues());
 
-        // initialize settings
-        checkboxes = new HashMap<String, Boolean>();
-        sortOrder = "newest";
-        displayDate(c);
-
+        if (filter.getSortOrder() != null){
+            sortOrder = "newest";
+        }
         setupSpinner();
+
+        if (filter.getDay() != null) {
+            c.set(Calendar.YEAR, Integer.parseInt(filter.getYear()));
+            c.set(Calendar.MONTH, Integer.parseInt(filter.getMonth()));
+            c.set(Calendar.DAY_OF_MONTH, Integer.parseInt(filter.getDay()));
+        }
 
     }
 
@@ -89,10 +102,33 @@ public class SettingActivity extends AppCompatActivity
     public void setupCheckboxes() {
         CheckBox checkArts = (CheckBox) findViewById(R.id.checkbox_arts);
         CheckBox checkFashion = (CheckBox) findViewById(R.id.checkbox_fashion);
+        CheckBox checkSport = (CheckBox) findViewById(R.id.checkbox_sport);
         assert checkArts != null;
         assert checkFashion != null;
         checkArts.setOnCheckedChangeListener(checkListener);
         checkFashion.setOnCheckedChangeListener(checkListener);
+        checkSport.setOnCheckedChangeListener(checkListener);
+    }
+
+
+    public void initCheckboxes(ArrayList<String> values){
+        CheckBox checkArts = (CheckBox) findViewById(R.id.checkbox_arts);
+        CheckBox checkFashion = (CheckBox) findViewById(R.id.checkbox_fashion);
+        CheckBox checkSport = (CheckBox) findViewById(R.id.checkbox_sport);
+
+        Log.d("DEBUG", (String) checkArts.getText());
+        // better way to do this?
+        for (int i=0; i < values.size(); ++i){
+            if (values.get(i).equals(checkArts.getText().toString())){
+                checkArts.setChecked(Boolean.TRUE);
+            }
+            if (values.get(i).equals(checkFashion.getText().toString())){
+                checkFashion.setChecked(Boolean.TRUE);
+            }
+            if (values.get(i).equals(checkSport.getText().toString())){
+                checkSport.setChecked(Boolean.TRUE);
+            }
+        }
     }
 
     public void setupSpinner(){
@@ -101,6 +137,7 @@ public class SettingActivity extends AppCompatActivity
         list.add("Oldest");
         ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,
                 R.layout.sort_spinner, list);
+
         spinner = (Spinner) findViewById(R.id.spinner_sort);
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(dataAdapter);
@@ -144,7 +181,7 @@ public class SettingActivity extends AppCompatActivity
 //        tvBeginDate.setText(date);
     }
 
-    public void displayDate(Calendar c){
+    public String displayDate(Calendar c){
         // convert date into displayable string format
         String date = Integer.toString(c.get(Calendar.MONTH)) + "/" +
                 Integer.toString(c.get(Calendar.DAY_OF_MONTH)) + "/" +
@@ -153,6 +190,8 @@ public class SettingActivity extends AppCompatActivity
         // display selected date
         tvBeginDate = (EditText) findViewById(R.id.startDate);
         tvBeginDate.setText(date);
+
+        return date;
     }
 
 

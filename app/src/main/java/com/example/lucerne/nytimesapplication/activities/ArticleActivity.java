@@ -10,6 +10,8 @@ import android.webkit.WebViewClient;
 import com.example.lucerne.nytimesapplication.models.Article;
 import com.example.lucerne.nytimesapplication.R;
 
+import org.parceler.Parcels;
+
 public class ArticleActivity extends AppCompatActivity {
 
     @Override
@@ -20,7 +22,7 @@ public class ArticleActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
 //        String url = getIntent().getStringExtra("url");
-        Article article = (Article) getIntent().getSerializableExtra("article");
+        Article article = (Article) Parcels.unwrap(getIntent().getParcelableExtra("article"));
         WebView webView = (WebView) findViewById(R.id.wvArticle);
 
         if (webView != null) {

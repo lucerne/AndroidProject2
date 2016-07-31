@@ -28,6 +28,7 @@ import com.loopj.android.http.RequestParams;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.parceler.Parcels;
 
 import java.util.ArrayList;
 
@@ -64,7 +65,7 @@ public class ArticleGridActivity extends AppCompatActivity {
 
                 Article article = articles.get(position);
 
-                i.putExtra("article", article);
+                i.putExtra("article", Parcels.wrap(article));
                 startActivity(i);
             }
         });
@@ -162,6 +163,7 @@ public class ArticleGridActivity extends AppCompatActivity {
     public void onSetting(MenuItem mi) {
         System.out.println("Current time");
         Intent i = new Intent(getApplicationContext(), SettingActivity.class);
+        i.putExtra("filter", Parcels.wrap(filter));
         startActivity(i);
     }
 }
