@@ -15,7 +15,10 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="50dp"
-            android:background="#ffffff" />
+            android:background="#ffffff"
+
+
+            />
 
     </android.support.design.widget.AppBarLayout>
 

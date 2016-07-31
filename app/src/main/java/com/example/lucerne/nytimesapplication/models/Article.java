@@ -3,16 +3,17 @@ package com.example.lucerne.nytimesapplication.models;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.parceler.Parcel;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  * Created by lucerne on 7/28/16.
  */
-@Parcel
-public class Article {
 
+public class Article implements Serializable {
+
+    private static final long serialVersionUID = 5177222050535318633L;
     String webUrl;
     String headline;
     String thumbNail;

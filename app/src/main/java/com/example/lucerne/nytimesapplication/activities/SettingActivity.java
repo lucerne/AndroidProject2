@@ -19,8 +19,7 @@ import com.example.lucerne.nytimesapplication.R;
 import com.example.lucerne.nytimesapplication.models.DatePickerFragment;
 import com.example.lucerne.nytimesapplication.models.Filter;
 
-import org.parceler.Parcels;
-
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -47,7 +46,7 @@ public class SettingActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         // old settings
-        Filter old_filter = (Filter) Parcels.unwrap(getIntent().getParcelableExtra("filter"));
+        Filter old_filter = (Filter) getIntent().getSerializableExtra("filter");
 
         // initialize settings, listener runs before this
         setupCheckboxes();
@@ -58,11 +57,12 @@ public class SettingActivity extends AppCompatActivity
         }
         setupSpinner();
 
-        if (old_filter.getDay() != -1) {
-            c.set(Calendar.YEAR, old_filter.getYear());
-            c.set(Calendar.MONTH, old_filter.getMonth());
-            c.set(Calendar.DAY_OF_MONTH, old_filter.getDay());
+        if (old_filter.getCalendar() != null){
+            c.set(Calendar.YEAR, old_filter.getCalendar().get(Calendar.YEAR));
+            c.set(Calendar.MONTH, old_filter.getCalendar().get(Calendar.MONTH));
+            c.set(Calendar.DAY_OF_MONTH, old_filter.getCalendar().get(Calendar.DAY_OF_MONTH));
         }
+        displayDate(c);
 
     }
 
@@ -146,7 +146,7 @@ public class SettingActivity extends AppCompatActivity
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(dataAdapter);
 
-        if (sortOrder.equals("Newest")){
+        if (sortOrder.equals("newest")){
             spinner.setSelection(0);
         }
         else {
@@ -157,7 +157,7 @@ public class SettingActivity extends AppCompatActivity
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
                 // your code here
-                sortOrder = spinner.getSelectedItem().toString();
+                sortOrder = spinner.getSelectedItem().toString().toLowerCase();
             }
 
             @Override
@@ -181,19 +181,15 @@ public class SettingActivity extends AppCompatActivity
         c.set(Calendar.MONTH, monthOfYear);
         c.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
-        filter.setDay(dayOfMonth);
-        filter.setMonth(monthOfYear);
-        filter.setYear(year);
+        String date = new SimpleDateFormat("MMddyyyy").format(c.getTime());
+        filter.setCalendar(c);
 
         displayDate(c);
     }
 
     public void displayDate(Calendar c){
         // convert date into displayable string format
-        String date = Integer.toString(c.get(Calendar.MONTH)) + "/" +
-                Integer.toString(c.get(Calendar.DAY_OF_MONTH)) + "/" +
-                Integer.toString(c.get(Calendar.YEAR));
-
+        String date = new SimpleDateFormat("MM/dd/yyyy").format(c.getTime());
         // display selected date
         tvBeginDate = (EditText) findViewById(R.id.startDate);
         tvBeginDate.setText(date);
@@ -202,7 +198,7 @@ public class SettingActivity extends AppCompatActivity
     // Give data to main
     public void onSave(View view){
         // closes the activity and returns to first screen
-        filter.setSortOrder(String.valueOf(spinner.getSelectedItem()));
+        filter.setSortOrder((String.valueOf(spinner.getSelectedItem())).toLowerCase());
 
         CheckBox checkArts = (CheckBox) findViewById(R.id.checkbox_arts);
         CheckBox checkFashion = (CheckBox) findViewById(R.id.checkbox_fashion);
@@ -222,7 +218,7 @@ public class SettingActivity extends AppCompatActivity
         filter.setNewsValues(newsValues);
 
         Intent i = new Intent();
-        i.putExtra("filter", Parcels.wrap(filter));
+        i.putExtra("filter", filter);
         setResult(RESULT_OK, i);
         this.finish();
     }

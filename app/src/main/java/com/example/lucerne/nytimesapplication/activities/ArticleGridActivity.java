@@ -1,7 +1,10 @@
 package com.example.lucerne.nytimesapplication.activities;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -16,11 +19,13 @@ import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.example.lucerne.nytimesapplication.R;
 import com.example.lucerne.nytimesapplication.adapters.ArticleArrayAdapter;
 import com.example.lucerne.nytimesapplication.models.Article;
 import com.example.lucerne.nytimesapplication.models.Filter;
+import com.example.lucerne.nytimesapplication.net.EndlessScrollListener;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
@@ -28,8 +33,8 @@ import com.loopj.android.http.RequestParams;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.parceler.Parcels;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import cz.msebera.android.httpclient.Header;
@@ -39,8 +44,9 @@ public class ArticleGridActivity extends AppCompatActivity {
     GridView gvResults;
     ArrayList<Article> articles;
     ArticleArrayAdapter articleAdapter;
-    Filter filter;
+    Filter filter = new Filter();
     private final int REQUEST_CODE = 1;
+    String currQuery;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +56,7 @@ public class ArticleGridActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         setupViews();
 
-        filter = new Filter();
+//        filter = new Filter();
     }
 
     public void setupViews() {
@@ -66,10 +72,30 @@ public class ArticleGridActivity extends AppCompatActivity {
 
                 Article article = articles.get(position);
 
-                i.putExtra("article", Parcels.wrap(article));
+                i.putExtra("article", article);
                 startActivity(i);
             }
         });
+
+        // Attach the listener to the AdapterView onCreate
+        gvResults.setOnScrollListener(new EndlessScrollListener() {
+            @Override
+            public boolean onLoadMore(int page, int totalItemsCount) {
+                // Triggered only when new data needs to be appended to the list
+                // Add whatever code is needed to append new items to your AdapterView
+                customLoadMoreDataFromApi(page);
+                // or customLoadMoreDataFromApi(totalItemsCount);
+                return true; // ONLY if more data is actually being loaded; false otherwise.
+            }
+        });
+    }
+
+    // Append more data into the adapter
+    public void customLoadMoreDataFromApi(int offset) {
+        // This method probably sends out a network request and appends new data items to your adapter.
+        // Use the offset value and add it as a parameter to your API request to retrieve paginated data.
+        // Deserialize API response and then construct new objects to append to the adapter
+        OnArticleSearch(currQuery, offset);
     }
 
     @Override
@@ -83,7 +109,8 @@ public class ArticleGridActivity extends AppCompatActivity {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 // perform query here
-                OnArticleSearch(query);
+                currQuery = query;
+                OnArticleSearch(query, 0);
                 // workaround to avoid issues with some emulators and keyboard devices firing twice if a keyboard enter is used
                 // see https://code.google.com/p/android/issues/detail?id=24599
                 searchView.clearFocus();
@@ -131,15 +158,44 @@ public class ArticleGridActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    public void OnArticleSearch(String query) {
+    public void OnArticleSearch(String query, int page) {
+        if (!isNetworkAvailable()){
+            Toast.makeText(getApplicationContext(), "Internet is not available",
+                    Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         AsyncHttpClient client = new AsyncHttpClient();
         String url = "http://api.nytimes.com/svc/search/v2/articlesearch.json";
 
         RequestParams params = new RequestParams();
         params.put("api-key", "7c3bb249c8aa4b7c8861b39cc84300cf");
-        params.put("page", 0);
         params.put("q", query);
-        params.put("sort", "newest");
+
+        if (filter.getNewsValues() != null) {
+            String begin_fq = "news_desk:(";
+            String fq = begin_fq;
+
+            for (int i = 0; i < filter.getNewsValues().size(); ++i) {
+                if (i == filter.getNewsValues().size() - 1) {
+                    fq += "\"" + filter.getNewsValues().get(i) + "\")";
+                } else {
+                    fq += "\"" + filter.getNewsValues().get(i) + "\" ";
+                }
+            }
+
+            if (!fq.equals(begin_fq)) {
+                params.put("fq", fq);
+            }
+        }
+        params.put("sort", filter.getSortOrder());
+        params.put("page", page);
+        if (filter.getCalendar() != null) {
+            String date = new SimpleDateFormat("yyyyMMdd").format(filter.getCalendar().getTime());
+            params.put("begin_date", date);
+        }
+
+        final int new_page = page;
 
         client.get(url, params, new JsonHttpResponseHandler() {
             @Override
@@ -150,7 +206,9 @@ public class ArticleGridActivity extends AppCompatActivity {
                 try {
                     articleJsonResults = response.getJSONObject("response").getJSONArray("docs");
 
-                    articleAdapter.clear();
+                    if (new_page == 0) {
+                        articleAdapter.clear();
+                    }
                     articleAdapter.addAll(Article.fromJSONArray(articleJsonResults));
                     articleAdapter.notifyDataSetChanged();
                     Log.d("DEBUG", articles.toString());
@@ -162,8 +220,8 @@ public class ArticleGridActivity extends AppCompatActivity {
     }
 
     public void onSetting(MenuItem mi) {
-        Intent i = new Intent(getApplicationContext(), SettingActivity.class);
-        i.putExtra("filter", Parcels.wrap(filter));
+        Intent i = new Intent(this, SettingActivity.class);
+        i.putExtra("filter", filter);
 //        startActivity(i);
         startActivityForResult(i,REQUEST_CODE);
     }
@@ -171,9 +229,16 @@ public class ArticleGridActivity extends AppCompatActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
-            Filter f = (Filter) Parcels.unwrap(data.getParcelableExtra("filter"));
-            // deep copy
-            filter = f;
+            // deep copy?
+            filter = (Filter) data.getSerializableExtra("filter");
+            int a = 1;
         }
+    }
+
+    private Boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting();
     }
 }

@@ -2,19 +2,28 @@ package com.example.lucerne.nytimesapplication.models;
 
 import org.parceler.Parcel;
 
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 /**
  * Created by lucerne on 7/30/16.
  */
 @Parcel
-public class Filter {
+public class Filter  implements Serializable {
 
     int month;
     int year;
     int day;
+
+    Calendar calendar;
     String sortOrder;
     ArrayList<String> newsValues;
+    private static final long serialVersionUID = 5177222050535318633L;
+
+    public Calendar getCalendar() { return calendar; }
+
+    public void setCalendar(Calendar calendar) { this.calendar = calendar; }
 
     public void setMonth(int month) {
         this.month = month;
