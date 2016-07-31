@@ -1,15 +1,19 @@
 package com.example.lucerne.nytimesapplication.models;
 
+import java.util.ArrayList;
+
 /**
  * Created by lucerne on 7/30/16.
  */
-public class FilterSetting {
+public class Filter {
 
     String date;
     String sortOrder;
-    String NewsValues;
+    ArrayList<String> NewsValues;
 
-    public FilterSetting(){};
+    public Filter(){
+        NewsValues = new ArrayList<String>();
+    };
 
     public String getDate() {
         return date;
@@ -19,7 +23,7 @@ public class FilterSetting {
         return sortOrder;
     }
 
-    public String getNewsValues() {
+    public ArrayList<String> getNewsValues() {
         return NewsValues;
     }
 

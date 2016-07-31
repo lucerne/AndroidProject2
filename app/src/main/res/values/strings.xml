@@ -8,4 +8,10 @@
     <string name="arts">Arts</string>
     <string name="fashion">Fashion</string>
     <string name="sport">Sports</string>
+
+    <string-array name="sort_by">
+        <item>Newest</item>
+        <item>Oldest</item>
+    </string-array>
+
 </resources>

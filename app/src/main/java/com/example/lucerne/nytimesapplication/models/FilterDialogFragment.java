@@ -21,6 +21,11 @@ public class FilterDialogFragment extends DialogFragment implements TextView.OnE
 
     private EditText mEditText;
 
+    // 1. Defines the listener interface with a method passing back data result.
+    public interface FilterDialogListener {
+        void onFinishEditDialog(String inputText);
+    }
+
     public FilterDialogFragment() {
         // Empty constructor is required for DialogFragment
         // Make sure not to add arguments to the constructor
@@ -34,13 +39,6 @@ public class FilterDialogFragment extends DialogFragment implements TextView.OnE
         frag.setArguments(args);
         return frag;
     }
-
-
-    // 1. Defines the listener interface with a method passing back data result.
-    public interface EditNameDialogListener {
-        void onFinishEditDialog(String inputText);
-    }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -72,7 +70,7 @@ public class FilterDialogFragment extends DialogFragment implements TextView.OnE
     public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
         if (EditorInfo.IME_ACTION_DONE == actionId) {
             // Return input text back to activity through the implemented listener
-            EditNameDialogListener listener = (EditNameDialogListener) getActivity();
+            FilterDialogListener listener = (FilterDialogListener) getActivity();
             listener.onFinishEditDialog(mEditText.getText().toString());
             // Close the dialog and return back to the parent activity
             dismiss();

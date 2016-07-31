@@ -20,6 +20,7 @@ import android.widget.ImageView;
 import com.example.lucerne.nytimesapplication.R;
 import com.example.lucerne.nytimesapplication.adapters.ArticleArrayAdapter;
 import com.example.lucerne.nytimesapplication.models.Article;
+import com.example.lucerne.nytimesapplication.models.Filter;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
@@ -37,6 +38,7 @@ public class ArticleGridActivity extends AppCompatActivity {
     GridView gvResults;
     ArrayList<Article> articles;
     ArticleArrayAdapter articleAdapter;
+    Filter filter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +47,8 @@ public class ArticleGridActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         setupViews();
+
+        filter = new Filter();
     }
 
     public void setupViews() {
@@ -157,7 +161,7 @@ public class ArticleGridActivity extends AppCompatActivity {
 
     public void onSetting(MenuItem mi) {
         System.out.println("Current time");
+        Intent i = new Intent(getApplicationContext(), SettingActivity.class);
+        startActivity(i);
     }
-
-
 }
