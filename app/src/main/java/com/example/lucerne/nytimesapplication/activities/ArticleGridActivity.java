@@ -40,6 +40,7 @@ public class ArticleGridActivity extends AppCompatActivity {
     ArrayList<Article> articles;
     ArticleArrayAdapter articleAdapter;
     Filter filter;
+    private final int REQUEST_CODE = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -161,9 +162,18 @@ public class ArticleGridActivity extends AppCompatActivity {
     }
 
     public void onSetting(MenuItem mi) {
-        System.out.println("Current time");
         Intent i = new Intent(getApplicationContext(), SettingActivity.class);
         i.putExtra("filter", Parcels.wrap(filter));
-        startActivity(i);
+//        startActivity(i);
+        startActivityForResult(i,REQUEST_CODE);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
+            Filter f = (Filter) Parcels.unwrap(data.getParcelableExtra("filter"));
+            // deep copy
+            filter = f;
+        }
     }
 }

@@ -37,8 +37,8 @@
     <Spinner
         android:layout_width="200dp"
         android:layout_height="wrap_content"
-        android:id="@+id/spinner_sort"
-        android:entries="@array/sort_by"
+        android:id="@+id/sort_spinner"
+        android:entries="@array/sort_spinner"
         android:layout_alignLeft="@id/checkboxes"
         android:layout_below="@id/checkboxes" />
 
@@ -49,8 +49,18 @@
         android:ems="10"
         android:id="@+id/startDate"
         android:layout_alignLeft="@id/checkboxes"
-        android:layout_below="@id/spinner_sort"
+        android:layout_below="@id/sort_spinner"
         android:text="Begin Date"
         android:onClick="showDatePickerDialog"/>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Save"
+        android:id="@+id/save"
+        android:layout_below="@+id/startDate"
+        android:layout_alignLeft="@+id/startDate"
+        android:layout_alignStart="@+id/startDate"
+        android:onClick="onSave"/>
 
 </RelativeLayout>

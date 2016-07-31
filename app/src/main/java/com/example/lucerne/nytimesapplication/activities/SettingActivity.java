@@ -1,6 +1,7 @@
 package com.example.lucerne.nytimesapplication.activities;
 
 import android.app.DatePickerDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -29,11 +30,14 @@ import java.util.Map;
 public class SettingActivity extends AppCompatActivity
         implements DatePickerDialog.OnDateSetListener {
 
-    final Calendar c = Calendar.getInstance();
     EditText tvBeginDate;
+    Spinner spinner;
+
+    final Calendar c = Calendar.getInstance();
     Map<String, Boolean> checkboxes = new HashMap<String, Boolean>();
     String sortOrder = "newest";
-    Spinner spinner;
+    Filter filter = new Filter();
+    ArrayList<String> newsValues = new ArrayList<String>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,21 +47,21 @@ public class SettingActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         // old settings
-        Filter filter = (Filter) Parcels.unwrap(getIntent().getParcelableExtra("filter"));
+        Filter old_filter = (Filter) Parcels.unwrap(getIntent().getParcelableExtra("filter"));
 
         // initialize settings, listener runs before this
         setupCheckboxes();
-        initCheckboxes(filter.getNewsValues());
+        initCheckboxes(old_filter.getNewsValues());
 
-        if (filter.getSortOrder() != null){
-            sortOrder = "newest";
+        if (old_filter.getSortOrder() != null){
+            sortOrder = old_filter.getSortOrder();
         }
         setupSpinner();
 
-        if (filter.getDay() != null) {
-            c.set(Calendar.YEAR, Integer.parseInt(filter.getYear()));
-            c.set(Calendar.MONTH, Integer.parseInt(filter.getMonth()));
-            c.set(Calendar.DAY_OF_MONTH, Integer.parseInt(filter.getDay()));
+        if (old_filter.getDay() != -1) {
+            c.set(Calendar.YEAR, old_filter.getYear());
+            c.set(Calendar.MONTH, old_filter.getMonth());
+            c.set(Calendar.DAY_OF_MONTH, old_filter.getDay());
         }
 
     }
@@ -138,9 +142,16 @@ public class SettingActivity extends AppCompatActivity
         ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this,
                 R.layout.sort_spinner, list);
 
-        spinner = (Spinner) findViewById(R.id.spinner_sort);
+        spinner = (Spinner) findViewById(R.id.sort_spinner);
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(dataAdapter);
+
+        if (sortOrder.equals("Newest")){
+            spinner.setSelection(0);
+        }
+        else {
+            spinner.setSelection(1);
+        }
 
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -170,18 +181,14 @@ public class SettingActivity extends AppCompatActivity
         c.set(Calendar.MONTH, monthOfYear);
         c.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
+        filter.setDay(dayOfMonth);
+        filter.setMonth(monthOfYear);
+        filter.setYear(year);
+
         displayDate(c);
-//        // convert date into displayable string format
-//        String date = Integer.toString(c.get(Calendar.MONTH)) + "/" +
-//                Integer.toString(c.get(Calendar.DAY_OF_MONTH)) + "/" +
-//                Integer.toString(c.get(Calendar.YEAR));
-//
-//        // display selected date
-//        tvBeginDate = (EditText) findViewById(R.id.startDate);
-//        tvBeginDate.setText(date);
     }
 
-    public String displayDate(Calendar c){
+    public void displayDate(Calendar c){
         // convert date into displayable string format
         String date = Integer.toString(c.get(Calendar.MONTH)) + "/" +
                 Integer.toString(c.get(Calendar.DAY_OF_MONTH)) + "/" +
@@ -190,11 +197,35 @@ public class SettingActivity extends AppCompatActivity
         // display selected date
         tvBeginDate = (EditText) findViewById(R.id.startDate);
         tvBeginDate.setText(date);
-
-        return date;
     }
 
+    // Give data to main
+    public void onSave(View view){
+        // closes the activity and returns to first screen
+        filter.setSortOrder(String.valueOf(spinner.getSelectedItem()));
 
+        CheckBox checkArts = (CheckBox) findViewById(R.id.checkbox_arts);
+        CheckBox checkFashion = (CheckBox) findViewById(R.id.checkbox_fashion);
+        CheckBox checkSport = (CheckBox) findViewById(R.id.checkbox_sport);
+
+
+        if (checkArts.isChecked()){
+            newsValues.add(checkArts.getText().toString());
+        }
+        if (checkFashion.isChecked()){
+            newsValues.add(checkFashion.getText().toString());
+        }
+        if (checkSport.isChecked()){
+            newsValues.add(checkSport.getText().toString());
+        }
+
+        filter.setNewsValues(newsValues);
+
+        Intent i = new Intent();
+        i.putExtra("filter", Parcels.wrap(filter));
+        setResult(RESULT_OK, i);
+        this.finish();
+    }
 }
 
 
