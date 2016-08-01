@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/miSettings"
-        android:icon="@drawable/yellowstarfull"
+        android:icon="@drawable/redgear"
         app:showAsAction="ifRoom"
         android:onClick="onSetting"
         android:title="@string/action_settings" />

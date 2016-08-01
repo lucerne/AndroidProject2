@@ -1,16 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:id="@+id/edit_name"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:paddingBottom="@dimen/activity_vertical_margin"
+android:paddingLeft="@dimen/activity_horizontal_margin"
+android:paddingRight="@dimen/activity_horizontal_margin"
+android:paddingTop="@dimen/activity_vertical_margin"
+app:layout_behavior="@string/appbar_scrolling_view_behavior"
+tools:context="com.example.lucerne.nytimesapplication.activities.SettingActivity"
+tools:showIn="@layout/activity_setting">
+
+<EditText
+    android:id="@+id/txt_your_name"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:inputType="text"
+    android:imeOptions="actionDone" />
+
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/edit_name"
-    android:layout_width="wrap_content" android:layout_height="wrap_content"
-    android:layout_gravity="center" android:orientation="vertical"  >
+    android:orientation="vertical"
+    android:layout_width="200dp"
+    android:layout_height="150dp"
+    android:layout_centerHorizontal="true"
+    android:id="@+id/checkboxes">
 
-    <TextView
-        android:id="@+id/filter_setting" android:text="Filter"
-        android:layout_width="wrap_content" android:layout_height="wrap_content" />
+    <CheckBox android:id="@+id/checkbox_arts"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/arts" />
+    <CheckBox android:id="@+id/checkbox_fashion"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/fashion" />
+    <CheckBox android:id="@+id/checkbox_sport"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/sport" />
 
-    <EditText
-        android:id="@+id/txt_your_name"
-        android:layout_width="match_parent"  android:layout_height="wrap_content"
-        android:inputType="text"
-        android:imeOptions="actionDone" />
 </LinearLayout>
+
+<Spinner
+    android:layout_width="200dp"
+    android:layout_height="wrap_content"
+    android:id="@+id/sort_spinner"
+    android:entries="@array/sort_spinner"
+    android:layout_alignLeft="@id/checkboxes"
+    android:layout_below="@id/checkboxes" />
+
+<EditText
+    android:layout_width="200dp"
+    android:layout_height="wrap_content"
+    android:inputType="date"
+    android:ems="10"
+    android:id="@+id/startDate"
+    android:layout_alignLeft="@id/checkboxes"
+    android:layout_below="@id/sort_spinner"
+    android:text="Begin Date"
+    android:onClick="showDatePickerDialog"/>
+
+<Button
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Save"
+    android:id="@+id/save"
+    android:layout_below="@+id/startDate"
+    android:layout_alignLeft="@+id/startDate"
+    android:layout_alignStart="@+id/startDate"
+    android:onClick="onSave"/>
+
+</RelativeLayout>

@@ -7,8 +7,7 @@
         android:id="@+id/miShare"
         app:showAsAction="ifRoom"
         android:title="Share"
-        app:actionProviderClass="android.support.v7.widget.ShareActionProvider"
-        android:icon="@drawable/yellowstarfull" >
+        app:actionProviderClass="android.support.v7.widget.ShareActionProvider" >
     </item>
 
 </menu>

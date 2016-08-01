@@ -8,6 +8,7 @@
     <string name="arts">Arts</string>
     <string name="fashion">Fashion</string>
     <string name="sport">Sports</string>
+    <string name="title_activity_filter">Filter_activity</string>
 
     <string-array name="sort_spinner">
         <item>Newest</item>

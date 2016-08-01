@@ -222,8 +222,10 @@ public class ArticleGridActivity extends AppCompatActivity {
     public void onSetting(MenuItem mi) {
         Intent i = new Intent(this, SettingActivity.class);
         i.putExtra("filter", filter);
-//        startActivity(i);
         startActivityForResult(i,REQUEST_CODE);
+
+//        Intent i = new Intent(this, FilterActivity.class);
+//        startActivity(i);
     }
 
     @Override

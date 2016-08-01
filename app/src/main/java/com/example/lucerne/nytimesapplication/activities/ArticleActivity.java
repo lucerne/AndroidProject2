@@ -55,7 +55,6 @@ public class ArticleActivity extends AppCompatActivity {
         // get reference to WebView
         WebView wvArticle = (WebView) findViewById(R.id.wvArticle);
         // pass in the URL currently being used by the WebView
-        String a = wvArticle.getUrl();
         shareIntent.putExtra(Intent.EXTRA_TEXT, wvArticle.getUrl());
 
         miShare.setShareIntent(shareIntent);
